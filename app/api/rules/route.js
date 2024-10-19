@@ -7,11 +7,14 @@ import { evaluateNode } from '@/lib/evaluate';
 export async function POST(request) {
   await connectToDatabase();
   const body = await request.json();
-  let {rule} =  body;
+  let {rule, combineOperator} =  body;
   try {
     if (!Array.isArray(rule)) {
       rule = [rule];
     }
+    if(combineOperator == 'AND')combineOperator ='&&';
+    else if(combineOperator == 'OR') combineOperator ='||';
+    else combineOperator = '&&';
     
     const asts = [];
     
@@ -24,14 +27,14 @@ export async function POST(request) {
   
     const combinedAst = {
       type: "LogicalExpression",
-      operator: "&&",
+      operator: combineOperator,
       left: asts[0],
       right: asts.slice(1).reduce((acc, currAst) => ({
         type: "LogicalExpression",
-        operator: "&&",
+        operator: combineOperator,
         left: acc,
         right: currAst
-      }), asts[0])
+      }), asts[1])
     };
     const combinedAstDocument = new AST({ ast: combinedAst, data: rule });
     await combinedAstDocument.save();
@@ -46,6 +49,7 @@ export async function PUT(request) {
   await connectToDatabase();
   const body = await request.json();
   let {rule, mockData} =  body;
+  console.log(mockData);
   try {
     const val = evaluateNode(rule?.ast, mockData);
     return NextResponse.json(val, { status: 200 });
