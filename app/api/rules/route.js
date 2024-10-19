@@ -1,23 +1,45 @@
 import { connectToDatabase } from '@/lib/db'; // 
 import AST from '../../../models/ast'; // 
 import { NextResponse } from 'next/server'; // Import NextResponse
-import { parseRuleExpression, formatRuleSyntax, extractImportantData } from '@/lib/parser';
+import { extractImportantData, formatRuleSyntax, getAst, parseRuleExpression } from '@/lib/parser';
 
 export async function POST(request) {
   await connectToDatabase();
-
-  const { searchParams } = new URL(request.url); // Access the URL of the request
-  const ruleString = searchParams.get('ruleString');
+  const body = await request.json();
+  let {rule} =  body;
   try {
-    const formatedRule = formatRuleSyntax(ruleString);
-    const allData = parseRuleExpression(formatedRule);
-    const ast = extractImportantData(allData);
-    const newAst = new AST({ ast });
-    await newAst.save();
+    if (!Array.isArray(rule)) {
+      rule = [rule];
+    }
     
-    return NextResponse.json(newAst, { status: 201 });
+    const asts = [];
+    
+    rule.forEach((r) => {
+      const formatted = formatRuleSyntax(r);
+      const ast = parseRuleExpression(formatted);
+      const required = extractImportantData(ast);
+      asts.push(new AST({ ast: required, data: r }));
+    });
+
+    console.log(asts);
+  
+    const combinedAst = {
+      type: "LogicalExpression",
+      operator: "&&",
+      left: asts[0],
+      right: asts.slice(1).reduce((acc, currAst) => ({
+        type: "LogicalExpression",
+        operator: "&&",
+        left: acc,
+        right: currAst
+      }), asts[0])
+    };
+    const combinedAstDocument = new AST({ ast: combinedAst, data: rule });
+    await combinedAstDocument.save();
+    
+    return NextResponse.json(combinedAstDocument, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Error saving AST' }, { status: 500 });
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }
 
