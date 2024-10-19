@@ -2,6 +2,7 @@ import { connectToDatabase } from '@/lib/db'; //
 import AST from '../../../models/ast'; // 
 import { NextResponse } from 'next/server'; // Import NextResponse
 import { extractImportantData, formatRuleSyntax, getAst, parseRuleExpression } from '@/lib/parser';
+import { evaluateNode } from '@/lib/evaluate';
 
 export async function POST(request) {
   await connectToDatabase();
@@ -20,8 +21,6 @@ export async function POST(request) {
       const required = extractImportantData(ast);
       asts.push(new AST({ ast: required, data: r }));
     });
-
-    console.log(asts);
   
     const combinedAst = {
       type: "LogicalExpression",
@@ -37,7 +36,19 @@ export async function POST(request) {
     const combinedAstDocument = new AST({ ast: combinedAst, data: rule });
     await combinedAstDocument.save();
     
-    return NextResponse.json(combinedAstDocument, { status: 201 });
+    return NextResponse.json(combinedAstDocument, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: error }, { status: 500 });
+  }
+}
+
+export async function PUT(request) {
+  await connectToDatabase();
+  const body = await request.json();
+  let {rule, mockData} =  body;
+  try {
+    const val = evaluateNode(rule?.ast, mockData);
+    return NextResponse.json(val, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
   }
