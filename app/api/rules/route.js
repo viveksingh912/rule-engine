@@ -16,27 +16,11 @@ export async function POST(request) {
     else if(combineOperator == 'OR') combineOperator ='||';
     else combineOperator = '&&';
     
-    const asts = [];
-    
-    rule.forEach((r) => {
-      const formatted = formatRuleSyntax(r);
-      const ast = parseRuleExpression(formatted);
-      const required = extractImportantData(ast);
-      asts.push(new AST({ ast: required, data: r }));
-    });
-  
-    const combinedAst = {
-      type: "LogicalExpression",
-      operator: combineOperator,
-      left: asts[0],
-      right: asts.slice(1).reduce((acc, currAst) => ({
-        type: "LogicalExpression",
-        operator: combineOperator,
-        left: acc,
-        right: currAst
-      }), asts[1])
-    };
-    const combinedAstDocument = new AST({ ast: combinedAst, data: rule });
+    const combineDRule= rule.join(` ${combineOperator} `);
+    const formatted = formatRuleSyntax(combineDRule);
+    const ast = parseRuleExpression(formatted);
+    const required = extractImportantData(ast);
+    const combinedAstDocument = new AST({ ast: required, data: rule });
     await combinedAstDocument.save();
     
     return NextResponse.json(combinedAstDocument, { status: 200 });
