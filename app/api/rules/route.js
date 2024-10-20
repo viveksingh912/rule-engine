@@ -33,7 +33,6 @@ export async function PUT(request) {
   await connectToDatabase();
   const body = await request.json();
   let {rule, mockData} =  body;
-  console.log(mockData);
   try {
     const val = evaluateNode(rule?.ast, mockData);
     return NextResponse.json(val, { status: 200 });
