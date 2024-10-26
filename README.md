@@ -12,7 +12,7 @@ Node.js and npm installed
 Getting Started
 1. Clone the Repository
 ```
-git clone <repository-url> https://github.com/viveksingh912/rule-engine
+git clone https://github.com/viveksingh912/rule-engine
 ```
 2. Navigate to the Project Directory
 ```
