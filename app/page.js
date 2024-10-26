@@ -1,29 +1,70 @@
 "use client"
-import { connectToDatabase } from "@/lib/db";
-import Image from "next/image";
-import { useEffect } from "react";
-import queryString from "query-string";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select } from '@/components/ui/select';
+import { X, Plus, Code } from 'lucide-react';
+import axios from 'axios';
 
-export default function Home() {
-  useEffect(()=>{
-
-  const makeReques= async ()=>{
-    const  ruleString  ="((age > 30 AND department ='Sales') OR (age < 25 AND'Marketing')) AND (salary > 50000 OR experience >5)"
-    const url = queryString.stringifyUrl({
-      url: `${process.env.NEXT_PUBLIC_BASE_URL}/rules`,
-      query: { ruleString },
-    });
-
-    const response = await axios.post(url, {}); 
-}
-makeReques();
-},[]);
+const RuleEngine = () => {
+  const [rule, setRule]=useState("");
+  const [userData, setUserData] = useState("");
+  const [result, setResult] = useState(false);
+  const cominators= ["AND", "OR"];
+  const evaluateRules = async ()=>{
+    const ast = (await axios.post('api/rules', {rule: rule})).data;
+    const res=(await axios.put('api/rules',{ast: ast, data: userData})).data
+    if(res.result){
+      alert("Congrats You've passed the test");
+    }
+    else{
+      alert("Oop's You've failed the test");
+    }
+  };
   return (
-  <>
-  <div>
-    
-  </div>
-  </>
+    <div className="p-4 max-w-6xl mx-auto space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Rule Builder</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+              <Textarea
+                placeholder="Enter rule string"
+                value={rule}
+                onChange={(e) => setRule( e.target.value)}
+                rows={5}
+              />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Test Data</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Textarea
+            placeholder="Enter test data in JSON format"
+            value={userData}
+            onChange={(e) => setUserData(e.target.value)}
+            rows={5}
+          />
+          <Button onClick={evaluateRules} disabled={ !rule || !userData}>
+            {/* {loading ? 'Evaluating...' : 'Evaluate All Rules'} */}
+            Evaluate Rule
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Evaluation Results</CardTitle>
+        </CardHeader>
+        
+      </Card>
+    </div>
   );
-}
+};
+
+export default RuleEngine;

@@ -23,7 +23,7 @@ export async function POST(request) {
     const combinedAstDocument = new AST({ ast: required, data: rule });
     await combinedAstDocument.save();
     
-    return NextResponse.json(combinedAstDocument, { status: 200 });
+    return NextResponse.json(combinedAstDocument?.ast, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
   }
@@ -32,10 +32,15 @@ export async function POST(request) {
 export async function PUT(request) {
   await connectToDatabase();
   const body = await request.json();
-  let {rule, mockData} =  body;
+  let {ast, data} =  body;
+  console.log(ast,data);
+  if(typeof ast === 'string')
+    ast= JSON.parse(ast);
+  if(typeof data === 'string')
+    data= JSON.parse(data);
   try {
-    const val = evaluateNode(rule?.ast, mockData);
-    return NextResponse.json(val, { status: 200 });
+    const val = evaluateNode(ast, data);
+    return NextResponse.json({result: val}, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
   }
