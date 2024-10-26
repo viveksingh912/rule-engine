@@ -9,6 +9,14 @@ export async function POST(request) {
   const body = await request.json();
   let {rule, combineOperator} =  body;
   try {
+    if(typeof rule === 'string'){
+      try{
+      rule = await JSON.parse(rule);
+      }
+      catch(error){
+        console.log(error);
+      }
+    }
     if (!Array.isArray(rule)) {
       rule = [rule];
     }
@@ -39,7 +47,7 @@ export async function PUT(request) {
   if(typeof data === 'string')
     data= JSON.parse(data);
   try {
-    const val = evaluateNode(ast, data);
+    const val = evaluateNode(ast, mockData);
     return NextResponse.json({result: val}, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
