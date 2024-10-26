@@ -8,6 +8,7 @@ API Endpoints: Provides endpoints for rule creation and execution.
 ```
 Prerequisites
 Node.js and npm installed
+Environment variables  are already add in .env file
 ```
 Getting Started
 1. Clone the Repository
