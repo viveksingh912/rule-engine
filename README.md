@@ -31,22 +31,22 @@ Design Choices
 Database: MongoDB was chosen due to its flexible document structure, which aligns well with the dynamic nature of AST nodes and the hierarchical rule representation.
 ```
 API Endpoints
+```
 1. Create Rule AST
 Endpoint: /api/rules
 Method: POST
 Description: Accepts a single rule or an array of rules and returns the corresponding AST structure.
 Request Body:
-```
+
 {
    "rule": "<rule_string>" or [rule_string1, rule_string2, rule_string3]
 }
 by default it combines rules using AND operator
-```
+
 2. Evaluate Rule with Data
 Endpoint: /api/rules
 Method: PUT
 Description: Accepts an AST and a data object to evaluate the eligibility based on defined rules.
-```
   {
      "ast": "<ast_structure>",
      "data": {
