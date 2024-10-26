@@ -42,12 +42,23 @@ export async function PUT(request) {
   const body = await request.json();
   let {ast, data} =  body;
   console.log(ast,data);
-  if(typeof ast === 'string')
+  if(typeof ast === 'string'){
+    try{
     ast= JSON.parse(ast);
-  if(typeof data === 'string')
+    }catch(error){
+      console.log(error);
+    }
+  }
+  if(typeof data === 'string'){
+    try{
     data= JSON.parse(data);
+    }
+    catch(error){
+      console.log(error);
+    }
+  }
   try {
-    const val = evaluateNode(ast, mockData);
+    const val = evaluateNode(ast, data);
     return NextResponse.json({result: val}, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
