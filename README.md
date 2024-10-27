@@ -24,9 +24,9 @@ cd rule-engine
 npm install
 ```
 5. Run the Project
-bash
-Copy code
+```
 npm run dev
+```
 Design Choices
 ```
 Database: MongoDB was chosen due to its flexible document structure, which aligns well with the dynamic nature of AST nodes and the hierarchical rule representation.
